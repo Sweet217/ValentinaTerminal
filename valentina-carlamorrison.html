@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal macOS - Valentina</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=SF+Mono:wght@400;500&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #1e1e1e;
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+            overflow: hidden;
+        }
+        
+        .terminal-window {
+            width: 100vw;
+            height: 100vh;
+            background: #2d2d2d;
+            border-radius: 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .title-bar {
+            height: 28px;
+            background: linear-gradient(180deg, #e8e8e8 0%, #d1d1d1 100%);
+            border-radius: 6px 6px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            border-bottom: 1px solid #b3b3b3;
+        }
+        
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 0.5px solid rgba(0,0,0,0.2);
+        }
+        
+        .close { background: #ff5f57; }
+        .minimize { background: #ffbd2e; }
+        .maximize { background: #28ca42; }
+        
+        .title {
+            font-size: 12px;
+            color: #4a4a4a;
+            font-weight: 500;
+        }
+        
+        .terminal-content {
+            flex: 1;
+            background: #1d1f21;
+            padding: 15px;
+            overflow-y: auto;
+            color: #c5c8c6;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .prompt {
+            color: #81a2be;
+            font-weight: 500;
+        }
+        
+        .command {
+            color: #b5bd68;
+            font-weight: 500;
+        }
+        
+        .output {
+            color: #c5c8c6;
+            margin: 2px 0;
+        }
+        
+        .love-message {
+            color: #f92672;
+            font-weight: 500;
+            text-shadow: 0 0 5px rgba(249, 38, 114, 0.3);
+        }
+        
+        .cursor {
+            background: #c5c8c6;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .typing {
+            border-right: 2px solid #c5c8c6;
+            animation: blink-cursor 1s infinite;
+        }
+        
+        @keyframes blink-cursor {
+            0%, 50% { border-color: #c5c8c6; }
+            51%, 100% { border-color: transparent; }
+        }
+        
+        .line {
+            opacity: 0;
+        }
+        
+        .line.show {
+            opacity: 1;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .heart {
+            color: #f92672;
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .audio-controls {
+            position: fixed;
+            top: 40px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(45, 45, 45, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #555;
+        }
+
+        .audio-controls button {
+            background: #f92672;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin: 0 5px;
+        }
+
+        .audio-controls button:hover {
+            background: #e91e63;
+        }
+
+        .audio-controls button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="audio-controls">
+        <button id="playBtn">▶ Reproducir Música</button>
+        <button id="pauseBtn" disabled>⏸ Pausar</button>
+        <span style="color: #c5c8c6; font-size: 11px; margin-left: 10px;">Valentina - Carla Morrison</span>
+    </div>
+
+    <div class="terminal-window">
+        <div class="title-bar">
+            <div class="traffic-lights">
+                <div class="light close"></div>
+                <div class="light minimize"></div>
+                <div class="light maximize"></div>
+            </div>
+            <div class="title">gvb@MacBook-Air — -zsh — 80×24</div>
+            <div></div>
+        </div>
+        
+        <div class="terminal-content" id="terminal">
+            <div class="output">Last login: Sun Sep 28 15:20:33 on Gabriel Velazquez MacBook-Air</div>
+            <div class="output"></div>
+            
+            <div class="line" id="line-0">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-0"></span>
+            </div>
+            <div class="line" id="output-0">
+                <span class="love-message" id="msg-0"></span>
+            </div>
+            
+            <div class="line" id="line-1">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-1"></span>
+            </div>
+            <div class="line" id="output-1">
+                <span class="love-message" id="msg-1"></span>
+            </div>
+            
+            <div class="line" id="line-2">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-2"></span>
+            </div>
+            <div class="line" id="output-2">
+                <span class="love-message" id="msg-2"></span>
+            </div>
+            
+            <div class="line" id="line-3">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-3"></span>
+            </div>
+            <div class="line" id="output-3">
+                <span class="love-message" id="msg-3"></span>
+            </div>
+            
+            <div class="line" id="line-4">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-4"></span>
+            </div>
+            <div class="line" id="output-4">
+                <span class="love-message" id="msg-4"></span>
+            </div>
+            
+            <div class="line" id="line-5">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-5"></span>
+            </div>
+            <div class="line" id="output-5">
+                <span class="love-message" id="msg-5"></span>
+            </div>
+            
+            <div class="line" id="line-6">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-6"></span>
+            </div>
+            <div class="line" id="output-6">
+                <span class="love-message" id="msg-6"></span>
+            </div>
+            
+            <div class="line" id="line-7">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-7"></span>
+            </div>
+            <div class="line" id="output-7">
+                <span class="love-message" id="msg-7"></span>
+            </div>
+            
+            <div class="line" id="line-8">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-8"></span>
+            </div>
+            <div class="line" id="output-8">
+                <span class="love-message" id="msg-8"></span>
+            </div>
+            
+            <div class="line" id="line-9">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-9"></span>
+            </div>
+            <div class="line" id="output-9">
+                <span class="love-message" id="msg-9"></span>
+            </div>
+            
+            <div class="line" id="line-10">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-10"></span>
+            </div>
+            <div class="line" id="output-10">
+                <span class="love-message" id="msg-10"></span>
+            </div>
+            
+            <div class="line" id="line-11">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-11"></span>
+            </div>
+            <div class="line" id="output-11">
+                <span class="love-message" id="msg-11"></span>
+            </div>
+            <div class="line" id="line-12">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="command typing" id="cmd-12"></span>
+            </div>
+            <div class="line" id="output-12">
+                <span class="love-message" id="msg-12"></span>
+            </div>
+            
+            <div class="line" id="final-line">
+                <span class="prompt">gvb@MacBook-Air</span> 
+                <span style="color: #969896;">~</span> 
+                <span style="color: #de935f;">%</span> 
+                <span class="cursor"> </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio element for background music -->
+    <audio id="backgroundMusic" loop>
+        <source src="Letra.mp3" type="audio/mpeg">
+        <source src="public/Letra.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const terminal = document.getElementById('terminal');
+            const backgroundMusic = document.getElementById('backgroundMusic');
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            
+            if (!terminal || !backgroundMusic || !playBtn || !pauseBtn) {
+                console.error('Required DOM elements not found');
+                return;
+            }
+            
+            const romanticPhrases = [
+                'echo "valentina vamos a dormir"',
+                'echo "tus ojos hermosos me dicen"',
+                'echo "que síiii"',
+                'echo "no te apures que yo estoy aquíiiii"',
+                'echo "te velare el sueño, te arruyaré a dormirr"',
+                'echo "valentína vamos a dormir"',
+                'echo "papito te quiere los dos estamos aquí"',
+                'echo "te velare el sueño, te arruyaré a dormirr"',
+                'echo "valentina te quiero hasta el fin"',
+                'echo "valentinaa-aa-aa"',
+                'echo "valentinaa-aa-aa-aa"',
+                'echo "valentinaa-aa-aa-aaa"',
+                'echo "valentina te quiero hasta el fin <3"'
+            ];
+
+           const messages = [
+            'valentina vamos a dormir',
+            'tus ojos hermosos me dicen',
+            'que síiii',
+            'no te apures que yo estoy aquíiiii',
+            'te velare el sueño, te arruyaré a dormirr',
+            'valentína vamos a dormir',
+            'papito te quiere los dos estamos aquí',
+            'te velare el sueño, te arruyaré a dormirr',
+            'valentina te quiero hasta el fin',
+            'valentinaa-aa-aa',
+            'valentinaa-aa-aa-aa',
+            'valentinaa-aa-aa-aaa',
+            'valentina te quiero hasta el fin <3'
+        ];
+
+        const timestamps = [
+                9000,   // 0:09
+                17000,  // 0:17
+                21000,  // 0:21
+                26000,  // 0:26
+                36000,  // 0:36
+                44000,  // 0:44
+                52000,  // 0:52
+                61000,  // 1:01
+                70000,  // 1:10
+                79000,  // 1:19
+                88000,  // 1:28
+                97000,  // 1:37
+                105000  // 1:45
+            ];
+
+            let currentLine = 0;
+            let animationStarted = false;
+            let timeouts = []; // Array to store timeout references
+
+            playBtn.addEventListener('click', () => {
+                backgroundMusic.play().then(() => {
+                    playBtn.disabled = true;
+                    pauseBtn.disabled = false;
+                    if (!animationStarted) {
+                        startSynchronizedSequence();
+                        animationStarted = true;
+                    }
+                }).catch(e => {
+                    console.log('Error al reproducir audio:', e);
+                    alert('Para reproducir música, necesitas interactuar con la página primero. Haz clic en cualquier lugar y luego presiona reproducir.');
+                });
+            });
+
+            pauseBtn.addEventListener('click', () => {
+                backgroundMusic.pause();
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                timeouts.forEach(timeout => clearTimeout(timeout));
+                timeouts = [];
+            });
+
+            function typeText(element, text, speed = 80) {
+                return new Promise((resolve) => {
+                    if (!element) {
+                        resolve();
+                        return;
+                    }
+                    
+                    let i = 0;
+                    element.textContent = '';
+                    element.classList.add('typing');
+                    
+                    const interval = setInterval(() => {
+                        element.textContent += text[i];
+                        i++;
+                        
+                        if (i >= text.length) {
+                            clearInterval(interval);
+                            element.classList.remove('typing');
+                            resolve();
+                        }
+                    }, speed);
+                });
+            }
+            
+            function typeOutput(element, text, speed = 30) {
+                return new Promise((resolve) => {
+                    if (!element) {
+                        resolve();
+                        return;
+                    }
+                    
+                    let i = 0;
+                    element.innerHTML = '';
+                    
+                    const interval = setInterval(() => {
+                        if (text[i] === ' ') {
+                            element.innerHTML += '&nbsp;';
+                        } else {
+                            element.innerHTML += text[i];
+                        }
+                        i++;
+                        
+                        if (i >= text.length) {
+                            clearInterval(interval);
+                            if (Math.random() > 0.6) {
+                                element.innerHTML += ' <span class="heart">♥</span>';
+                            }
+                            resolve();
+                        }
+                    }, speed);
+                });
+            }
+            
+            async function executeLine(index) {
+                if (index >= romanticPhrases.length) return;
+                
+                const lineElement = document.getElementById(`line-${index}`);
+                const cmdElement = document.getElementById(`cmd-${index}`);
+                const outputElement = document.getElementById(`output-${index}`);
+                const msgElement = document.getElementById(`msg-${index}`);
+                
+                if (!lineElement || !cmdElement || !outputElement || !msgElement) {
+                    console.error(`Missing elements for line ${index}`);
+                    return;
+                }
+                
+                lineElement.classList.add('show');
+                
+                await typeText(cmdElement, romanticPhrases[index], 60);
+                
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                outputElement.classList.add('show');
+                
+                await typeOutput(msgElement, messages[index], 40);
+                
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+            
+            function startSynchronizedSequence() {
+                timeouts.forEach(timeout => clearTimeout(timeout));
+                timeouts = [];
+                
+                timestamps.forEach((timestamp, index) => {
+                    const timeout = setTimeout(() => {
+                        executeLine(index);
+                    }, timestamp);
+                    timeouts.push(timeout);
+                });
+                
+                const finalTimeout = setTimeout(() => {
+                    const finalLine = document.getElementById('final-line');
+                    if (finalLine) {
+                        finalLine.classList.add('show');
+                        terminal.scrollTop = terminal.scrollHeight;
+                    }
+                }, 120000);
+                timeouts.push(finalTimeout);
+            }
+            
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.audio-controls')) return;
+                
+                if (animationStarted) {
+                    timeouts.forEach(timeout => clearTimeout(timeout));
+                    timeouts = [];
+                    
+                    for (let i = 0; i < romanticPhrases.length; i++) {
+                        const lineElement = document.getElementById(`line-${i}`);
+                        const outputElement = document.getElementById(`output-${i}`);
+                        const cmdElement = document.getElementById(`cmd-${i}`);
+                        const msgElement = document.getElementById(`msg-${i}`);
+                        
+                        if (lineElement) lineElement.classList.remove('show');
+                        if (outputElement) outputElement.classList.remove('show');
+                        if (cmdElement) cmdElement.textContent = '';
+                        if (msgElement) msgElement.innerHTML = '';
+                    }
+                    
+                    const finalLine = document.getElementById('final-line');
+                    if (finalLine) finalLine.classList.remove('show');
+                    
+                    backgroundMusic.currentTime = 0;
+                    backgroundMusic.play();
+                    setTimeout(() => {
+                        startSynchronizedSequence();
+                    }, 100);
+                }
+            });
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'F11') {
+                    e.preventDefault();
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen();
+                    } else {
+                        document.exitFullscreen();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
