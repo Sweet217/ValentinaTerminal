@@ -143,10 +143,14 @@
             top: 40px;
             right: 20px;
             z-index: 1000;
-            background: rgba(45, 45, 45, 0.9);
+            background: rgba(45, 45, 45, 0.95);
             padding: 10px;
             border-radius: 8px;
             border: 1px solid #555;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .audio-controls button {
@@ -157,7 +161,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
-            margin: 0 5px;
+            white-space: nowrap;
         }
 
         .audio-controls button:hover {
@@ -168,13 +172,68 @@
             background: #666;
             cursor: not-allowed;
         }
+
+        .audio-info {
+            color: #c5c8c6;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        /* Media queries para dispositivos móviles */
+        @media screen and (max-width: 768px) {
+            .audio-controls {
+                bottom: 20px;
+                top: auto;
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+                padding: 8px;
+                flex-direction: column;
+                gap: 6px;
+                min-width: 280px;
+            }
+
+            .audio-controls button {
+                padding: 10px 16px;
+                font-size: 14px;
+                width: 100%;
+                border-radius: 6px;
+            }
+
+            .audio-info {
+                font-size: 10px;
+                text-align: center;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .audio-controls {
+                bottom: 15px;
+                left: 15px;
+                right: 15px;
+                transform: none;
+                min-width: auto;
+                padding: 6px;
+            }
+
+            .audio-controls button {
+                padding: 12px 20px;
+                font-size: 16px;
+                font-weight: 500;
+            }
+
+            .audio-info {
+                font-size: 9px;
+                margin-top: 2px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="audio-controls">
         <button id="playBtn">▶ Reproducir Música</button>
         <button id="pauseBtn" disabled>⏸ Pausar</button>
-        <span style="color: #c5c8c6; font-size: 11px; margin-left: 10px;">Valentina - Carla Morrison</span>
+        <div class="audio-info">Valentina - Carla Morrison</div>
     </div>
 
     <div class="terminal-window">
